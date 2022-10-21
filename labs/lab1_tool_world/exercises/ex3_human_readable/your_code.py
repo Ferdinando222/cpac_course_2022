@@ -1,5 +1,7 @@
 import numpy as np
-TEACHER_CODE=True
+TEACHER_CODE = True
+
+
 def sort_songs(audio_features):
     """"Receive audio features and sort them according to your criterion"
 
@@ -9,15 +11,16 @@ def sort_songs(audio_features):
     Returns:
         list of dict: the sorted list
     """
-    sorted_songs=[]
+    sorted_songs = []
 
     # Random shuffle: replace it!
     if TEACHER_CODE:
-        random_idxs=np.random.permutation(len(audio_features))
+        random_idxs = np.random.permutation(len(audio_features))
         for idx in random_idxs:
             sorted_songs.append(audio_features[idx])
     else:
+        danceability = np.array([af["danceability"] for af in audio_features])
         pass
         # your code here
-        
+
     return sorted_songs

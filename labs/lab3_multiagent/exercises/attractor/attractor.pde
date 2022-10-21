@@ -1,5 +1,8 @@
+import processing.sound.*;
 
-AgentMover mover;
+
+AgentMover[] mover;
+String[] names;
 int MASS_TO_PIXEL=10;
 float mass_mover = 10;
 float mass_attractor;
@@ -31,7 +34,14 @@ String[] getFilenames(){
 
 
 void setup(){
-  mover=new AgentMover(10);
+  names = getFilenames();
+  mover=new AgentMover[names.length];
+  
+  for(int i=0; i<names.length; i++){
+    mover[i] = new AgentMover(10,new SoundFile(this,names[i]));
+    mover[i].sound.loop();
+  }
+  
   mass_attractor=random(800, 1200);
   pos_attractor = new PVector(width/2., height/2.);  
   radius_attractor = sqrt(mass_attractor/PI)*MASS_TO_PIXEL;
@@ -40,15 +50,18 @@ void setup(){
   background(0);  
 }
 
-PVector computeGravityForce(AgentMover mover){
+float computeApplyGravityForce(AgentMover mover){
   PVector attr_force = mover.position.copy();
 
   attr_force.sub(pos_attractor);
   dist= attr_force.mag();
+  float unconstrainedDist = dist;
   dist=constrain(dist, dist_min,dist_max);
   attr_force.normalize();
   attr_force.mult(-1*mass_attractor*mover.mass/(dist*dist));
-  return attr_force;
+  
+  mover.applyForce(attr_force);
+  return unconstrainedDist;
 }
 
     
@@ -59,9 +72,14 @@ void draw(){
   fill(200, 0, 200, 40);
   ellipse(pos_attractor.x, pos_attractor.y, 
           radius_attractor, radius_attractor);
-  
-  PVector force = computeGravityForce(mover);
-  mover.applyForce(force);
-  mover.update();
-  mover.draw();
+  float dist;
+  float gain;
+  for(int i = 0; i<names.length;i++){
+      dist = computeApplyGravityForce(mover[i]);
+      gain = 1/(1+0.01*dist);
+      gain = constrain(gain,0.01,1);
+      mover[i].sound.amp(gain);
+      mover[i].update();
+      mover[i].draw();  
+  }
 }
